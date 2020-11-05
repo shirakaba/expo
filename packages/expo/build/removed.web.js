@@ -4,6 +4,7 @@ export const AdMobBanner = null;
 export const AdMobInterstitial = null;
 export const AdMobRewarded = null;
 export const Animated = null;
+export const AppLoading = null;
 export const AR = null;
 export const AuthSession = null;
 export const Easing = null;

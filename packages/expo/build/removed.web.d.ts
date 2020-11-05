@@ -2,6 +2,7 @@ export declare const AdMobBanner: null;
 export declare const AdMobInterstitial: null;
 export declare const AdMobRewarded: null;
 export declare const Animated: null;
+export declare const AppLoading: null;
 export declare const AR: null;
 export declare const AuthSession: null;
 export declare const Easing: null;

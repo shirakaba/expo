@@ -4,6 +4,8 @@
 
 ### 🛠 Breaking changes
 
+- Deprecated `.installationId` and `.deviceId`. Please implement installation identifier on your own using `expo-secure-store` on iOS, `expo-application`'s `.androidId` on Android and `localStorage` on Web.
+
 ### 🎉 New features
 
 ### 🐛 Bug fixes

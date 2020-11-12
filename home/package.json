@@ -33,6 +33,7 @@
     "es6-error": "^4.0.1",
     "expo": "~39.0.1",
     "expo-analytics-amplitude": "~8.3.1",
+    "expo-application": "~2.3.0",
     "expo-asset": "~8.2.0",
     "expo-barcode-scanner": "~9.0.0",
     "expo-blur": "~8.2.0",
@@ -43,6 +44,7 @@
     "expo-linear-gradient": "~8.3.1",
     "expo-location": "~9.0.1",
     "expo-permissions": "~9.3.0",
+    "expo-secure-store": "~9.2.0",
     "expo-splash-screen": "~0.7.1",
     "expo-task-manager": "~8.5.0",
     "expo-web-browser": "~8.5.0",
@@ -71,7 +73,8 @@
     "redux-thunk": "^2.3.0",
     "semver": "^6.1.1",
     "sha1": "^1.1.1",
-    "url": "^0.11.0"
+    "url": "^0.11.0",
+    "uuid": "^8.3.1"
   },
   "devDependencies": {
     "jest-expo": "~39.0.0",

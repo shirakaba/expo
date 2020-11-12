@@ -140,20 +140,31 @@ NSString *fakeLauncherBundleUrl = @"embedded://exdevelopmentclient/dummy";
 
 - (void)_initApp:(NSURL *)bundleUrl manifest:(NSDictionary * _Nullable)manifest
 {
-  UIInterfaceOrientationMask orientationMask = UIInterfaceOrientationMaskAll;
-  if ([@"portrait" isEqualToString:manifest[@"orientation"]]) {
-    orientationMask = UIInterfaceOrientationMaskPortrait;
-  } else if ([@"landscape" isEqualToString:manifest[@"orientation"]]) {
-    orientationMask = UIInterfaceOrientationMaskLandscape;
-  }
-  __block UIInterfaceOrientation orientation = [EXDevelopmentClientController defaultOrientationForOrientationMask:orientationMask];
+  __block UIInterfaceOrientation orientation = [EXDevelopmentClientController getOrientationFromManifest:manifest];
+  __block UIColor *backgroundColor = [EXDevelopmentClientController colorWithHexString:[EXDevelopmentClientController readBackgroundColorFromManifest:manifest]];
   
   dispatch_async(dispatch_get_main_queue(), ^{
     self.sourceUrl = bundleUrl;
     [self.delegate developmentClientController:self didStartWithSuccess:YES];
     [[UIDevice currentDevice] setValue:@(orientation) forKey:@"orientation"];
     [UIViewController attemptRotationToDeviceOrientation];
+    
+    if (backgroundColor) {
+      _window.rootViewController.view.backgroundColor = backgroundColor;
+      _window.backgroundColor = backgroundColor;
+    }
   });
+}
+
++ (UIInterfaceOrientation)getOrientationFromManifest:(NSDictionary * _Nullable)manifest
+{
+  UIInterfaceOrientationMask orientationMask = UIInterfaceOrientationMaskAll;
+  if ([@"portrait" isEqualToString:manifest[@"orientation"]]) {
+    orientationMask = UIInterfaceOrientationMaskPortrait;
+  } else if ([@"landscape" isEqualToString:manifest[@"orientation"]]) {
+    orientationMask = UIInterfaceOrientationMaskLandscape;
+  }
+  return [EXDevelopmentClientController defaultOrientationForOrientationMask:orientationMask];
 }
 
 + (UIInterfaceOrientation)defaultOrientationForOrientationMask:(UIInterfaceOrientationMask)orientationMask
@@ -168,6 +179,35 @@ NSString *fakeLauncherBundleUrl = @"embedded://exdevelopmentclient/dummy";
     return UIInterfaceOrientationPortraitUpsideDown;
   }
   return UIInterfaceOrientationUnknown;
+}
+
++ (NSString * _Nullable)readBackgroundColorFromManifest:(NSDictionary *)manifest
+{
+  if (manifest[@"ios"] && manifest[@"ios"][@"backgroundColor"]) {
+    return manifest[@"ios"][@"backgroundColor"];
+  }
+  return manifest[@"backgroundColor"];
+}
+
++ (UIColor *)colorWithHexString:(NSString *)hexString
+{
+  if (!hexString || hexString.length != 7 || [hexString characterAtIndex:0] != '#') {
+    return nil;
+  }
+  hexString = [hexString substringWithRange:NSMakeRange(1, 6)];
+  NSScanner *scanner = [NSScanner scannerWithString:hexString];
+  unsigned int hex;
+  if ([scanner scanHexInt:&hex]) {
+    int r = (hex >> 16) & 0xFF;
+    int g = (hex >> 8) & 0xFF;
+    int b = (hex) & 0xFF;
+    
+    return [UIColor colorWithRed:r / 255.0f
+                           green:g / 255.0f
+                            blue:b / 255.0f
+                           alpha:1.0f];
+  }
+  return nil;
 }
 
 @end

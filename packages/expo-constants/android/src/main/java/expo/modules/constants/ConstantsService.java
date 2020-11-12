@@ -28,9 +28,8 @@ public class ConstantsService implements InternalModule, ConstantsInterface {
   protected Context mContext;
   protected int mStatusBarHeight = 0;
   private String mSessionId = UUID.randomUUID().toString();
-  private SharedPreferences sharedPref;
-  private static final String PREFERENCES_FILE_NAME = "host.exp.exponent.SharedPreferences";
-  private static final String UUID_KEY = "uuid";
+  private ExponentInstallationId mExponentInstallationId;
+
 
   private static int convertPixelsToDp(float px, Context context) {
     Resources resources = context.getResources();
@@ -42,8 +41,7 @@ public class ConstantsService implements InternalModule, ConstantsInterface {
   public ConstantsService(Context context) {
     super();
     mContext = context;
-
-    sharedPref = mContext.getSharedPreferences(PREFERENCES_FILE_NAME, Context.MODE_PRIVATE);
+    mExponentInstallationId = new ExponentInstallationId(mContext);
 
     int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
 
@@ -121,12 +119,7 @@ public class ConstantsService implements InternalModule, ConstantsInterface {
   }
 
   public String getOrCreateInstallationId() {
-    String uuid = sharedPref.getString(UUID_KEY, null);
-    if (uuid == null) {
-      uuid = UUID.randomUUID().toString();
-      sharedPref.edit().putString(UUID_KEY, uuid).apply();
-    }
-    return uuid;
+    return mExponentInstallationId.getOrCreateUUID();
   }
   
   public List<String> getSystemFonts() {

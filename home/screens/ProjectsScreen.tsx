@@ -38,7 +38,6 @@ type State = {
   projects: DevSession[];
   isNetworkAvailable: boolean;
   isRefreshing: boolean;
-  snackId: string | undefined;
 };
 
 type NavigationProps = StackScreenProps<AllStackRoutes, 'Projects'>;
@@ -88,7 +87,6 @@ class ProjectsView extends React.Component<Props, State> {
 
   state: State = {
     projects: [],
-    snackId: undefined,
     isNetworkAvailable: Connectivity.isAvailable(),
     isRefreshing: false,
   };
@@ -97,7 +95,6 @@ class ProjectsView extends React.Component<Props, State> {
     AppState.addEventListener('change', this._maybeResumePollingFromAppState);
     Connectivity.addListener(this._updateConnectivity);
     this._startPollingForProjects();
-    getSnackId().then(snackId => this.setState({ snackId }));
 
     // NOTE(brentvatne): if we add QR code button to the menu again, we'll need to
     // find a way to move this listener up to the root of the app in order to ensure
@@ -209,7 +206,7 @@ class ProjectsView extends React.Component<Props, State> {
     try {
       const api = new ApiV2HttpClient();
       const projects = await api.getAsync('development-sessions', {
-        deviceId: await getSnackId(),
+        deviceId: getSnackId(),
       });
       this.setState({ projects });
     } catch (e) {
@@ -310,10 +307,10 @@ class ProjectsView extends React.Component<Props, State> {
       <View style={styles.constantsContainer}>
         <StyledText
           style={styles.deviceIdText}
-          onPress={this.state.snackId ? this._copySnackIdToClipboard : undefined}
+          onPress={this._copySnackIdToClipboard}
           lightColor="rgba(0,0,0,0.3)"
           darkColor="rgba(255,255,255,0.6)">
-          Device ID: {this.state.snackId ?? 'Fetching…'}
+          Device ID: {getSnackId()}
         </StyledText>
         <StyledText
           style={styles.expoVersionText}
@@ -333,8 +330,7 @@ class ProjectsView extends React.Component<Props, State> {
   };
 
   private _copySnackIdToClipboard = () => {
-    // Only available if snackId is set
-    Clipboard.setString(this.state.snackId!);
+    Clipboard.setString(getSnackId());
 
     // Should have some integrated alert banner
     alert('The device ID has been copied to your clipboard');

@@ -15,6 +15,7 @@
 - Added a peer dependency on `react-native@>=0.20.0`. ([#10811](https://github.com/expo/expo/pull/10811) by [@sjchmiela](https://github.com/sjchmiela))
 
   > Note that this change most probably will not affect you — it only affects projects that use unimodules and this library without React Native which is not possible without some serious gymnastics.
+- Fixed device identifier being used to fetch Expo push token being backed up on Android which resulted in multiple devices having the same `deviceId` (and eventually, Expo push token). ([#11005](https://github.com/expo/expo/pull/11005) by [@sjchmiela](https://github.com/sjchmiela))
 
 ### 🎉 New features
 

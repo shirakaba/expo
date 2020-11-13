@@ -19,7 +19,6 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSString *)deviceModel;
 + (NSNumber *)deviceYear;
 + (NSString *)deviceName;
-+ (NSString *)installationId;
 
 @end
 

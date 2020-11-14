@@ -3,7 +3,7 @@
 #import <EXNotifications/EXServerRegistrationModule.h>
 
 static NSString * const kEXDeviceInstallUUIDKey = @"EXDeviceInstallUUIDKey";
-static NSString * const kEXLastRegistrationInfoKey = @"EXLastRegistrationInfoKey";
+static NSString * const kEXRegistrationInfoKey = @"EXNotificationRegistrationInfoKey";
 
 @implementation EXServerRegistrationModule
 
@@ -26,19 +26,19 @@ UM_EXPORT_METHOD_AS(getInstallationIdAsync,
   return uuid;
 }
 
-UM_EXPORT_METHOD_AS(getLastRegistrationInfoAsync,
-                    getLastRegistrationInfoAsyncWithResolver:(UMPromiseResolveBlock)resolve 
-                                                    rejecter:(UMPromiseRejectBlock)reject)
+UM_EXPORT_METHOD_AS(getRegistrationInfoAsync,
+                    getRegistrationInfoAsyncWithResolver:(UMPromiseResolveBlock)resolve
+                                                rejecter:(UMPromiseRejectBlock)reject)
 {
-  resolve([[NSUserDefaults standardUserDefaults] stringForKey:kEXLastRegistrationInfoKey]);
+  resolve([[NSUserDefaults standardUserDefaults] stringForKey:kEXRegistrationInfoKey]);
 }
 
-UM_EXPORT_METHOD_AS(setLastRegistrationInfoAsync,
-                    setLastRegistrationInfoAsync:(NSString *)lastRegistrationInfo
-                                        resolver:(UMPromiseResolveBlock)resolve
-                                        rejecter:(UMPromiseRejectBlock)reject)
+UM_EXPORT_METHOD_AS(setRegistrationInfoAsync,
+                    setRegistrationInfoAsync:(NSString *)registrationInfo
+                                    resolver:(UMPromiseResolveBlock)resolve
+                                    rejecter:(UMPromiseRejectBlock)reject)
 {
-  [[NSUserDefaults standardUserDefaults] setObject:lastRegistrationInfo forKey:kEXLastRegistrationInfoKey];
+  [[NSUserDefaults standardUserDefaults] setObject:registrationInfo forKey:kEXRegistrationInfoKey];
   resolve(nil);
 }
 

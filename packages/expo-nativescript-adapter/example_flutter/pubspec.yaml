@@ -1,0 +1,34 @@
+name: test_suite_nativescript
+description: A Test Suite for Expo Modules on NativeScript.
+
+
+dependencies:
+  # nativescript:
+  #   sdk: nativescript
+
+  cupertino_icons: ^0.1.0
+
+  expo_nativescript_adapter: ^0.1.0
+
+  expo_permissions: ^0.1.0
+
+  # expo_sensors: ^0.1.0
+
+dev_dependencies:
+  # nativescript_test:
+  #   sdk: nativescript
+
+
+nativescript:
+  uses-material-design: true
+
+dependency_overrides:
+  expo_nativescript_adapter:
+      path: ../../expo-nativescript-adapter
+
+  expo_permissions:
+    path: ../../expo-permissions-nativescript-plugin
+
+  # expo_sensors:
+  #   path: ../../expo-sensors-nativescript-plugin
+

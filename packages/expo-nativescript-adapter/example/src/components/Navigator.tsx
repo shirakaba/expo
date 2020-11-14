@@ -1,21 +1,21 @@
 import * as React from "react";
 import { BaseNavigationContainer } from '@react-navigation/core';
 import { stackNavigatorFactory } from "react-nativescript-navigation";
-import { First } from "./FirstScreen";
-import { Second } from "./SecondScreen";
+import { Home } from "./HomeScreen";
+import { Permissions } from "./PermissionsScreen";
 
 const StackNavigator = stackNavigatorFactory();
 
 export const mainStackNavigator = () => (
     <BaseNavigationContainer>
         <StackNavigator.Navigator
-            initialRouteName="first"
+            initialRouteName="home"
             screenOptions={{
                 headerShown: true,
             }}
         >
-            <StackNavigator.Screen name="first" component={First} />
-            <StackNavigator.Screen name="second" component={Second} />
+            <StackNavigator.Screen options={{ title: "Unimodules Test Suite" }} name="home" component={Home} />
+            <StackNavigator.Screen name="permissions" component={Permissions} />
         </StackNavigator.Navigator>
     </BaseNavigationContainer>
 );

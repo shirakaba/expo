@@ -1,27 +1,27 @@
-#import "ExpoFlutterAdapterPlugin.h"
-#import <Flutter/Flutter.h>
+#import "ExpoNativeScriptAdapterPlugin.h"
+// #import <Flutter/Flutter.h>
 #import "InternalServicesModule.h"
 #import <UMCore/UMModuleRegistry.h>
 #import <UMCore/UMInternalModule.h>
 #import <UMCore/UMModuleRegistryProvider.h>
 #import <UMCore/UMEventEmitter.h>
 
-@interface ExpoFlutterAdapterPlugin ()
+@interface ExpoNativeScriptAdapterPlugin ()
 
 @property (nonatomic, strong) UMModuleRegistry *moduleRegistry;
 @property (nonatomic, strong) InternalServicesModule *internalServicesModule;
 
 @end
 
-@implementation ExpoFlutterAdapterPlugin
+@implementation ExpoNativeScriptAdapterPlugin
 
 # pragma mark FlutterPlugin impl
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
     FlutterMethodChannel* channel = [FlutterMethodChannel
-                                     methodChannelWithName:@"flutter_adapter.expo.io/method_calls"
+                                     methodChannelWithName:@"nativescript_adapter.expo.io/method_calls"
                                      binaryMessenger:[registrar messenger]];
-    ExpoFlutterAdapterPlugin* instance = [[ExpoFlutterAdapterPlugin alloc] initWithRegistrar:registrar];
+    ExpoNativeScriptAdapterPlugin* instance = [[ExpoNativeScriptAdapterPlugin alloc] initWithRegistrar:registrar];
     [registrar addMethodCallDelegate:instance channel:channel];
 }
 
@@ -80,7 +80,7 @@
 
             if ([module isKindOfClass:[InternalServicesModule class]]) {
                 FlutterEventChannel* eventChannel =
-                [FlutterEventChannel eventChannelWithName:@"flutter_adapter.expo.io/events" binaryMessenger:[registrar messenger]];
+                [FlutterEventChannel eventChannelWithName:@"nativescript_adapter.expo.io/events" binaryMessenger:[registrar messenger]];
                 [eventChannel setStreamHandler:module];
                 _internalServicesModule = (InternalServicesModule*) module;
                 break;

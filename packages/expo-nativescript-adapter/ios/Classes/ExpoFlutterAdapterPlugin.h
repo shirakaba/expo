@@ -1,7 +1,7 @@
-#import <Flutter/Flutter.h>
+// #import <Flutter/Flutter.h>
 #import <UMCore/UMInternalModule.h>
 #import <UMCore/UMEventEmitterService.h>
 
-@interface ExpoFlutterAdapterPlugin : NSObject<FlutterPlugin>
+@interface ExpoNativeScriptAdapterPlugin : NSObject<NativeScriptPlugin>
 
 @end

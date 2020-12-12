@@ -1,5 +1,6 @@
 include ':app'
 
+// flutterProjectRoot: /Users/jamie/Documents/git/expo/packages/expo-flutter-adapter
 def flutterProjectRoot = rootProject.projectDir.parentFile.toPath()
 
 def plugins = new Properties()

@@ -1,5 +1,7 @@
 import FastGlob from 'fast-glob';
 import fs from 'fs';
+import { mkdir, rm, writeFile } from 'fs/promises';
+import os from 'os';
 import path from 'path';
 
 import {
@@ -11,250 +13,326 @@ jest.mock('fs');
 jest.mock('fast-glob');
 const ActualFs = jest.requireActual('fs') as typeof fs;
 const ActualFastGlob = jest.requireActual('fast-glob') as typeof FastGlob;
-const cwd = path.resolve(__dirname, 'fixtures/contrived-template');
 
-describe('getTemplateFilesToRenameAsync', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+describe('fixture-based tests', () => {
+  let fixtureTemplateDir: string | undefined;
+  let cwd: string;
+  beforeAll(async () => {
+    fixtureTemplateDir = await createFixtureTemplate();
+    cwd = fixtureTemplateDir;
+  });
+  afterAll(async () => {
+    if (fixtureTemplateDir) {
+      await rm(fixtureTemplateDir, { recursive: true });
+    }
   });
 
-  it('returns no files when passed an empty rename config', async () => {
-    const spyGlob = jest.spyOn(FastGlob, 'glob').mockImplementation(async (source, options) => {
-      return await ActualFastGlob.glob(source, { ...options, fs: ActualFs });
-    });
-
-    const files = await getTemplateFilesToRenameAsync({ cwd, renameConfig: [] });
-    expect(files).toHaveLength(0);
-    expect(spyGlob).toHaveBeenCalledTimes(1);
-  });
-
-  it('matches platform-specific template files by default', async () => {
-    const spyGlob = jest.spyOn(FastGlob, 'glob').mockImplementation(async (source, options) => {
-      return await ActualFastGlob.glob(source, { ...options, fs: ActualFs });
-    });
-
-    const files = await getTemplateFilesToRenameAsync({ cwd });
-    expect(files.sort()).toEqual([
-      'android/app/BUCK',
-      'android/app/build.gradle',
-      'android/app/src/debug/AndroidManifest.xml',
-      'android/app/src/main/AndroidManifest.xml',
-      'android/app/src/main/java/com/helloworld/MainActivity.kt',
-      'android/app/src/main/java/com/helloworld/MainApplication.kt',
-      'android/build.gradle',
-      'android/settings.gradle',
-
-      'app.json',
-
-      'ios/HelloWorld.xcodeproj/project.pbxproj',
-      'ios/HelloWorld.xcodeproj/xcshareddata/xcschemes/HelloWorld.xcscheme',
-      'ios/HelloWorld.xcworkspace/contents.xcworkspacedata',
-      'ios/Podfile',
-
-      'macos/HelloWorld.xcodeproj/project.pbxproj',
-      'macos/HelloWorld.xcodeproj/xcshareddata/xcschemes/HelloWorld.xcscheme',
-      'macos/HelloWorld.xcworkspace/contents.xcworkspacedata',
-      'macos/Podfile',
-    ]);
-    expect(spyGlob).toHaveBeenCalledTimes(1);
-  });
-
-  it('default matches can be overridden explicitly', async () => {
-    const spyGlob = jest.spyOn(FastGlob, 'glob').mockImplementation(async (source, options) => {
-      return await ActualFastGlob.glob(source, { ...options, fs: ActualFs });
-    });
-
-    const files = await getTemplateFilesToRenameAsync({ cwd, renameConfig: ['app.json'] });
-    expect(files.sort()).toEqual(['app.json']);
-    expect(spyGlob).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe('renameTemplateAppNameAsync', () => {
-  // All templates start as "HelloWorld" by convention and, through this
-  // function, can be renamed to the user's preference (e.g. to ByeWorld).
-
-  describe('config behaviour', () => {
+  describe('getTemplateFilesToRenameAsync', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
 
-    it('skips renaming when explicitly passed an empty rename config', async () => {
-      // No need to mock fs.readFile/writeFile this time, as we'll be asserting
-      // that they weren't called in the first place!
-      const spyReadFile = jest.spyOn(fs.promises, 'readFile');
-      const spyWriteFile = jest.spyOn(fs.promises, 'writeFile');
+    it('returns no files when passed an empty rename config', async () => {
+      const spyGlob = jest.spyOn(FastGlob, 'glob').mockImplementation(async (source, options) => {
+        return await ActualFastGlob.glob(source, { ...options, fs: ActualFs });
+      });
 
-      await renameTemplateAppNameAsync({ cwd, files: [], name: 'ByeWorld' });
-
-      // We expect readFile to not have been called, as passing an empty
-      // renameConfig should cause an empty set of patterns to be passed to
-      // glob.
-      expect(spyReadFile).not.toHaveBeenCalled();
-
-      // As no files were read, none should be overwritten, either.
-      expect(spyWriteFile).not.toHaveBeenCalled();
+      const files = await getTemplateFilesToRenameAsync({ cwd, renameConfig: [] });
+      expect(files).toHaveLength(0);
+      expect(spyGlob).toHaveBeenCalledTimes(1);
     });
 
-    it('renames files containing the "HelloWorld" string', async () => {
-      const spyReadFile = jest
-        .spyOn(fs.promises, 'readFile')
-        .mockImplementation(async (filePath, _encoding) => {
-          switch (path.basename(filePath as string)) {
-            case 'app.json': {
-              return '{ "expo": { "name": "HelloWorld" } }';
+    it('matches platform-specific template files by default', async () => {
+      const spyGlob = jest.spyOn(FastGlob, 'glob').mockImplementation(async (source, options) => {
+        return await ActualFastGlob.glob(source, { ...options, fs: ActualFs });
+      });
+
+      const files = await getTemplateFilesToRenameAsync({ cwd });
+      expect(files.sort()).toEqual([
+        'android/app/BUCK',
+        'android/app/build.gradle',
+        'android/app/src/debug/AndroidManifest.xml',
+        'android/app/src/main/AndroidManifest.xml',
+        'android/app/src/main/java/com/helloworld/MainActivity.kt',
+        'android/app/src/main/java/com/helloworld/MainApplication.kt',
+        'android/build.gradle',
+        'android/settings.gradle',
+
+        'app.json',
+
+        'ios/HelloWorld.xcodeproj/project.pbxproj',
+        'ios/HelloWorld.xcodeproj/xcshareddata/xcschemes/HelloWorld.xcscheme',
+        'ios/HelloWorld.xcworkspace/contents.xcworkspacedata',
+        'ios/Podfile',
+
+        'macos/HelloWorld.xcodeproj/project.pbxproj',
+        'macos/HelloWorld.xcodeproj/xcshareddata/xcschemes/HelloWorld.xcscheme',
+        'macos/HelloWorld.xcworkspace/contents.xcworkspacedata',
+        'macos/Podfile',
+      ]);
+      expect(spyGlob).toHaveBeenCalledTimes(1);
+    });
+
+    it('default matches can be overridden explicitly', async () => {
+      const spyGlob = jest.spyOn(FastGlob, 'glob').mockImplementation(async (source, options) => {
+        return await ActualFastGlob.glob(source, { ...options, fs: ActualFs });
+      });
+
+      const files = await getTemplateFilesToRenameAsync({ cwd, renameConfig: ['app.json'] });
+      expect(files.sort()).toEqual(['app.json']);
+      expect(spyGlob).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('renameTemplateAppNameAsync', () => {
+    // All templates start as "HelloWorld" by convention and, through this
+    // function, can be renamed to the user's preference (e.g. to ByeWorld).
+
+    describe('config behaviour', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it('skips renaming when explicitly passed an empty rename config', async () => {
+        // No need to mock fs.readFile/writeFile this time, as we'll be asserting
+        // that they weren't called in the first place!
+        const spyReadFile = jest.spyOn(fs.promises, 'readFile');
+        const spyWriteFile = jest.spyOn(fs.promises, 'writeFile');
+
+        await renameTemplateAppNameAsync({ cwd, files: [], name: 'ByeWorld' });
+
+        // We expect readFile to not have been called, as passing an empty
+        // renameConfig should cause an empty set of patterns to be passed to
+        // glob.
+        expect(spyReadFile).not.toHaveBeenCalled();
+
+        // As no files were read, none should be overwritten, either.
+        expect(spyWriteFile).not.toHaveBeenCalled();
+      });
+
+      it('renames files containing the "HelloWorld" string', async () => {
+        const spyReadFile = jest
+          .spyOn(fs.promises, 'readFile')
+          .mockImplementation(async (filePath, _encoding) => {
+            switch (path.basename(filePath as string)) {
+              case 'app.json': {
+                return '{ "expo": { "name": "HelloWorld" } }';
+              }
             }
-          }
 
-          throw new Error(`Accessed unexpected file: ${filePath}`);
-        });
+            throw new Error(`Accessed unexpected file: ${filePath}`);
+          });
 
-      const spyWriteFile = jest
-        .spyOn(fs.promises, 'writeFile')
-        .mockImplementation(async (_filePath, data) => {
-          expect(data).toMatch('{ "expo": { "name": "ByeWorld" } }');
-        });
+        const spyWriteFile = jest
+          .spyOn(fs.promises, 'writeFile')
+          .mockImplementation(async (_filePath, data) => {
+            expect(data).toMatch('{ "expo": { "name": "ByeWorld" } }');
+          });
 
-      await renameTemplateAppNameAsync({ cwd, files: ['app.json'], name: 'ByeWorld' });
+        await renameTemplateAppNameAsync({ cwd, files: ['app.json'], name: 'ByeWorld' });
 
-      expect(spyReadFile).toHaveBeenCalledTimes(1);
-      expect(spyWriteFile).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('renaming behaviour', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
+        expect(spyReadFile).toHaveBeenCalledTimes(1);
+        expect(spyWriteFile).toHaveBeenCalledTimes(1);
+      });
     });
 
-    it('renames app names in camelCase', async () => {
-      const spyReadFile = jest
-        .spyOn(fs.promises, 'readFile')
-        .mockImplementation(async (_filePath, _encoding) => 'HelloWorld');
+    describe('renaming behaviour', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+      });
 
-      const spyWriteFile = jest
-        .spyOn(fs.promises, 'writeFile')
-        .mockImplementation(async (filePath, data) => {
-          expect(path.basename(filePath as string)).toBe('app.json');
-          expect(data).toMatch('ByeWorld');
-        });
+      it('renames app names in camelCase', async () => {
+        const spyReadFile = jest
+          .spyOn(fs.promises, 'readFile')
+          .mockImplementation(async (_filePath, _encoding) => 'HelloWorld');
 
-      await renameTemplateAppNameAsync({ cwd, files: ['app.json'], name: 'ByeWorld' });
-
-      expect(spyReadFile).toHaveBeenCalledTimes(1);
-      expect(spyWriteFile).toHaveBeenCalledTimes(1);
-    });
-
-    it('renames app names in lowercase', async () => {
-      const spyReadFile = jest
-        .spyOn(fs.promises, 'readFile')
-        .mockImplementation(async (_filePath, _encoding) => 'helloworld');
-
-      const spyWriteFile = jest
-        .spyOn(fs.promises, 'writeFile')
-        .mockImplementation(async (filePath, data) => {
-          expect(path.basename(filePath as string)).toBe('app.json');
-          expect(data).toMatch('byeworld');
-        });
-
-      await renameTemplateAppNameAsync({ cwd, files: ['app.json'], name: 'ByeWorld' });
-
-      expect(spyReadFile).toHaveBeenCalledTimes(1);
-      expect(spyWriteFile).toHaveBeenCalledTimes(1);
-    });
-
-    it('renames the app display name', async () => {
-      const spyReadFile = jest
-        .spyOn(fs.promises, 'readFile')
-        .mockImplementation(async (_filePath, _encoding) => 'Hello App Display Name');
-
-      const spyWriteFile = jest
-        .spyOn(fs.promises, 'writeFile')
-        .mockImplementation(async (filePath, data) => {
-          expect(path.basename(filePath as string)).toBe('app.json');
-          expect(data).toMatch('ByeWorld');
-        });
-
-      await renameTemplateAppNameAsync({ cwd, files: ['app.json'], name: 'ByeWorld' });
-
-      expect(spyReadFile).toHaveBeenCalledTimes(1);
-      expect(spyWriteFile).toHaveBeenCalledTimes(1);
-    });
-
-    it('avoids writing if the replaced contents would be identical anyway', async () => {
-      const spyReadFile = jest
-        .spyOn(fs.promises, 'readFile')
-        .mockImplementation(async (_filePath, _encoding) => 'HelloWorld');
-
-      // No need to mock fs.writeFile this time, as we'll be asserting that it
-      // wasn't called in the first place.
-      const spyWriteFile = jest.spyOn(fs.promises, 'writeFile');
-
-      await renameTemplateAppNameAsync({ cwd, files: ['app.json'], name: 'HelloWorld' });
-
-      expect(spyReadFile).toHaveBeenCalledTimes(1);
-      expect(spyWriteFile).toHaveBeenCalledTimes(0);
-    });
-
-    it('sanitizes generally unsafe characters when renaming', async () => {
-      const spyReadFile = jest
-        .spyOn(fs.promises, 'readFile')
-        .mockImplementation(async (_filePath, _encoding) => 'HelloWorld');
-
-      const spyWriteFile = jest
-        .spyOn(fs.promises, 'writeFile')
-        .mockImplementation(async (filePath, data) => {
-          expect(path.basename(filePath as string)).toBe('app.json');
-          expect(data).toMatch('ByeWorld');
-        });
-
-      await renameTemplateAppNameAsync({ cwd, files: ['app.json'], name: 'Bye!World' });
-
-      expect(spyReadFile).toHaveBeenCalledTimes(1);
-      expect(spyWriteFile).toHaveBeenCalledTimes(1);
-    });
-
-    // Whether the expected behaviour is a bug or not is up for discussion. This
-    // test is partially for the purpose of characterising the current behaviour.
-    //
-    // To be precise, this quirk originally existed only in Expo CLI (because XML
-    // escaping was only performed there), but now Create Expo has been made
-    // consistent with that behaviour as well.
-    it('sanitizes XML-unsafe characters in XML and Plist files when renaming', async () => {
-      // There is probably a more Jesty way to spy this, but I am tired
-      const filesRead: string[] = [];
-      const filesWritten: string[] = [];
-
-      const spyReadFile = jest
-        .spyOn(fs.promises, 'readFile')
-        .mockImplementation(async (filePath, _encoding) => {
-          filesRead.push(filePath as string);
-          return 'HelloWorld';
-        });
-
-      const spyWriteFile = jest
-        .spyOn(fs.promises, 'writeFile')
-        .mockImplementation(async (filePath, data) => {
-          if (['.plist', '.xml'].includes(path.extname(filePath as string))) {
-            // XML escaping followed by sanitization:
-            // Bye<World -> Bye&lt;World -> ByeltWorld
-            expect(data).toMatch('ByeltWorld');
-          } else {
-            // Sanitization:
-            // Bye<World -> ByeWorld
+        const spyWriteFile = jest
+          .spyOn(fs.promises, 'writeFile')
+          .mockImplementation(async (filePath, data) => {
+            expect(path.basename(filePath as string)).toBe('app.json');
             expect(data).toMatch('ByeWorld');
-          }
+          });
 
-          filesWritten.push(filePath as string);
-        });
+        await renameTemplateAppNameAsync({ cwd, files: ['app.json'], name: 'ByeWorld' });
 
-      const files = ['app.json', 'app.plist', 'app.xml'];
-      await renameTemplateAppNameAsync({ cwd, files, name: 'Bye<World' });
+        expect(spyReadFile).toHaveBeenCalledTimes(1);
+        expect(spyWriteFile).toHaveBeenCalledTimes(1);
+      });
 
-      expect(spyReadFile).toHaveBeenCalledTimes(3);
-      expect(spyWriteFile).toHaveBeenCalledTimes(3);
-      expect(filesRead).toEqual(files.map((file) => path.resolve(cwd, file)));
-      expect(filesWritten).toEqual(files.map((file) => path.resolve(cwd, file)));
+      it('renames app names in lowercase', async () => {
+        const spyReadFile = jest
+          .spyOn(fs.promises, 'readFile')
+          .mockImplementation(async (_filePath, _encoding) => 'helloworld');
+
+        const spyWriteFile = jest
+          .spyOn(fs.promises, 'writeFile')
+          .mockImplementation(async (filePath, data) => {
+            expect(path.basename(filePath as string)).toBe('app.json');
+            expect(data).toMatch('byeworld');
+          });
+
+        await renameTemplateAppNameAsync({ cwd, files: ['app.json'], name: 'ByeWorld' });
+
+        expect(spyReadFile).toHaveBeenCalledTimes(1);
+        expect(spyWriteFile).toHaveBeenCalledTimes(1);
+      });
+
+      it('renames the app display name', async () => {
+        const spyReadFile = jest
+          .spyOn(fs.promises, 'readFile')
+          .mockImplementation(async (_filePath, _encoding) => 'Hello App Display Name');
+
+        const spyWriteFile = jest
+          .spyOn(fs.promises, 'writeFile')
+          .mockImplementation(async (filePath, data) => {
+            expect(path.basename(filePath as string)).toBe('app.json');
+            expect(data).toMatch('ByeWorld');
+          });
+
+        await renameTemplateAppNameAsync({ cwd, files: ['app.json'], name: 'ByeWorld' });
+
+        expect(spyReadFile).toHaveBeenCalledTimes(1);
+        expect(spyWriteFile).toHaveBeenCalledTimes(1);
+      });
+
+      it('avoids writing if the replaced contents would be identical anyway', async () => {
+        const spyReadFile = jest
+          .spyOn(fs.promises, 'readFile')
+          .mockImplementation(async (_filePath, _encoding) => 'HelloWorld');
+
+        // No need to mock fs.writeFile this time, as we'll be asserting that it
+        // wasn't called in the first place.
+        const spyWriteFile = jest.spyOn(fs.promises, 'writeFile');
+
+        await renameTemplateAppNameAsync({ cwd, files: ['app.json'], name: 'HelloWorld' });
+
+        expect(spyReadFile).toHaveBeenCalledTimes(1);
+        expect(spyWriteFile).toHaveBeenCalledTimes(0);
+      });
+
+      it('sanitizes generally unsafe characters when renaming', async () => {
+        const spyReadFile = jest
+          .spyOn(fs.promises, 'readFile')
+          .mockImplementation(async (_filePath, _encoding) => 'HelloWorld');
+
+        const spyWriteFile = jest
+          .spyOn(fs.promises, 'writeFile')
+          .mockImplementation(async (filePath, data) => {
+            expect(path.basename(filePath as string)).toBe('app.json');
+            expect(data).toMatch('ByeWorld');
+          });
+
+        await renameTemplateAppNameAsync({ cwd, files: ['app.json'], name: 'Bye!World' });
+
+        expect(spyReadFile).toHaveBeenCalledTimes(1);
+        expect(spyWriteFile).toHaveBeenCalledTimes(1);
+      });
+
+      // Whether the expected behaviour is a bug or not is up for discussion. This
+      // test is partially for the purpose of characterising the current behaviour.
+      //
+      // To be precise, this quirk originally existed only in Expo CLI (because XML
+      // escaping was only performed there), but now Create Expo has been made
+      // consistent with that behaviour as well.
+      it('sanitizes XML-unsafe characters in XML and Plist files when renaming', async () => {
+        // There is probably a more Jesty way to spy this, but I am tired
+        const filesRead: string[] = [];
+        const filesWritten: string[] = [];
+
+        const spyReadFile = jest
+          .spyOn(fs.promises, 'readFile')
+          .mockImplementation(async (filePath, _encoding) => {
+            filesRead.push(filePath as string);
+            return 'HelloWorld';
+          });
+
+        const spyWriteFile = jest
+          .spyOn(fs.promises, 'writeFile')
+          .mockImplementation(async (filePath, data) => {
+            if (['.plist', '.xml'].includes(path.extname(filePath as string))) {
+              // XML escaping followed by sanitization:
+              // Bye<World -> Bye&lt;World -> ByeltWorld
+              expect(data).toMatch('ByeltWorld');
+            } else {
+              // Sanitization:
+              // Bye<World -> ByeWorld
+              expect(data).toMatch('ByeWorld');
+            }
+
+            filesWritten.push(filePath as string);
+          });
+
+        const files = ['app.json', 'app.plist', 'app.xml'];
+        await renameTemplateAppNameAsync({ cwd, files, name: 'Bye<World' });
+
+        expect(spyReadFile).toHaveBeenCalledTimes(3);
+        expect(spyWriteFile).toHaveBeenCalledTimes(3);
+        expect(filesRead).toEqual(files.map((file) => path.resolve(cwd, file)));
+        expect(filesWritten).toEqual(files.map((file) => path.resolve(cwd, file)));
+      });
     });
   });
 });
+
+/**
+ * Typical files that templates might be made up of.
+ */
+const fixtureTemplateFiles = {
+  /**
+   * Files containing the "HelloWorld" or "com.helloworld" placeholder strings
+   * (i.e. files that we match against in the default rename config).
+   */
+  matchedByDefaultRenameConfig: [
+    'android/app/BUCK',
+    'android/app/build.gradle',
+    'android/app/src/debug/AndroidManifest.xml',
+    'android/app/src/main/AndroidManifest.xml',
+    'android/app/src/main/java/com/helloworld/MainActivity.kt',
+    'android/app/src/main/java/com/helloworld/MainApplication.kt',
+    'android/build.gradle',
+    'android/settings.gradle',
+
+    'app.json',
+
+    'ios/HelloWorld.xcodeproj/project.pbxproj',
+    'ios/HelloWorld.xcodeproj/xcshareddata/xcschemes/HelloWorld.xcscheme',
+    'ios/HelloWorld.xcworkspace/contents.xcworkspacedata',
+    'ios/Podfile',
+
+    'macos/HelloWorld.xcodeproj/project.pbxproj',
+    'macos/HelloWorld.xcodeproj/xcshareddata/xcschemes/HelloWorld.xcscheme',
+    'macos/HelloWorld.xcworkspace/contents.xcworkspacedata',
+    'macos/Podfile',
+  ],
+
+  /**
+   * Files not typically containing the "HelloWorld" placeholder string (i.e.
+   * files that we don't match against in the default rename config).
+   */
+  notMatchedByDefaultRenameConfig: ['ios/HelloWorld/Info.plist', 'macos/HelloWorld/Info.plist'],
+} as const;
+
+/**
+ * Creates a fixture for an Expo template in a temporary directory.
+ *
+ * The files within the fixture are empty. The only thing we're testing on for
+ * now is matching on the files themselves via glob paths configured in our
+ * default rename config.
+ *
+ * @returns the absolute path to that directory.
+ */
+async function createFixtureTemplate() {
+  // For some reason, the async version of mkdtemp() throws an ENOENT error.
+  // Perhaps the mocking environment is interfering in some way.
+  const tmpDir = ActualFs.mkdtempSync(path.join(os.tmpdir(), 'mock-expo-template-'));
+  const { matchedByDefaultRenameConfig, notMatchedByDefaultRenameConfig } = fixtureTemplateFiles;
+
+  await Promise.all(
+    [...matchedByDefaultRenameConfig, ...notMatchedByDefaultRenameConfig].map(async (filePath) => {
+      await mkdir(path.join(tmpDir, path.dirname(filePath)), { recursive: true });
+      await writeFile(path.join(tmpDir, filePath), '');
+    })
+  );
+
+  return tmpDir;
+}

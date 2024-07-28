@@ -1,0 +1,25 @@
+{
+  "name": "expo-template-macos",
+  "description": "The Blank project template includes the minimum dependencies to run and an empty root component.",
+  "version": "50.0.18",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "expo start --dev-client",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "macos": "react-native run-macos --scheme HelloWorld-macOS",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "expo": "~50.0.18",
+    "expo-dev-client": "^3.3.9",
+    "react": "18.2.0",
+    "react-native": "~0.73.9",
+    "react-native-macos": "~0.73.30",
+    "typescript": "^5.5.4"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.22.11",
+    "@types/react": "~18.3.3"
+  }
+}

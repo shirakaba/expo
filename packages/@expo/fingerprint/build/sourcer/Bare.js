@@ -5,11 +5,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getBareAndroidSourcesAsync = getBareAndroidSourcesAsync;
 exports.getBareIosSourcesAsync = getBareIosSourcesAsync;
+exports.getBareMacosSourcesAsync = getBareMacosSourcesAsync;
 exports.getPackageJsonScriptSourcesAsync = getPackageJsonScriptSourcesAsync;
 exports.getGitIgnoreSourcesAsync = getGitIgnoreSourcesAsync;
 exports.getCoreAutolinkingSourcesFromRncCliAsync = getCoreAutolinkingSourcesFromRncCliAsync;
 exports.getCoreAutolinkingSourcesFromExpoAndroid = getCoreAutolinkingSourcesFromExpoAndroid;
 exports.getCoreAutolinkingSourcesFromExpoIos = getCoreAutolinkingSourcesFromExpoIos;
+exports.getCoreAutolinkingSourcesFromExpoMacos = getCoreAutolinkingSourcesFromExpoMacos;
 const spawn_async_1 = __importDefault(require("@expo/spawn-async"));
 const assert_1 = __importDefault(require("assert"));
 const chalk_1 = __importDefault(require("chalk"));
@@ -36,6 +38,16 @@ async function getBareIosSourcesAsync(projectRoot, options) {
         const result = await (0, Utils_1.getFileBasedHashSourceAsync)(projectRoot, 'ios', 'bareNativeDir');
         if (result != null) {
             debug(`Adding bare native dir - ${chalk_1.default.dim('ios')}`);
+            return [result];
+        }
+    }
+    return [];
+}
+async function getBareMacosSourcesAsync(projectRoot, options) {
+    if (options.platforms.includes('macos')) {
+        const result = await (0, Utils_1.getFileBasedHashSourceAsync)(projectRoot, 'macos', 'bareNativeDir');
+        if (result != null) {
+            debug(`Adding bare native dir - ${chalk_1.default.dim('macos')}`);
             return [result];
         }
     }
@@ -149,6 +161,32 @@ async function getCoreAutolinkingSourcesFromExpoIos(projectRoot, options, useRNC
         return [];
     }
 }
+async function getCoreAutolinkingSourcesFromExpoMacos(projectRoot, options, useRNCoreAutolinkingFromExpo) {
+    if (useRNCoreAutolinkingFromExpo === false || !options.platforms.includes('macos')) {
+        return [];
+    }
+    try {
+        const { stdout } = await (0, spawn_async_1.default)('node', [
+            (0, ExpoResolver_1.resolveExpoAutolinkingCliPath)(projectRoot),
+            'react-native-config',
+            '--json',
+            '--platform',
+            'macos',
+        ], { cwd: projectRoot });
+        const config = JSON.parse(stdout);
+        const results = await parseCoreAutolinkingSourcesAsync({
+            config,
+            contentsId: 'rncoreAutolinkingConfig:macos',
+            reasons: ['rncoreAutolinkingMacos'],
+            platform: 'macos',
+        });
+        return results;
+    }
+    catch (e) {
+        debug(chalk_1.default.red(`Error adding react-native core autolinking sources for macos.\n${e}`));
+        return [];
+    }
+}
 async function parseCoreAutolinkingSourcesAsync({ config, reasons, contentsId, platform, }) {
     const logTag = platform
         ? `react-native core autolinking dir for ${platform}`
@@ -210,6 +248,9 @@ function normalizePackageJsonScriptSources(scripts, options) {
         if (!scripts.ios?.includes('run') || scripts.ios === 'expo run:ios') {
             delete scripts.ios;
         }
+        // Non-development builds do not (currently) begin with an `expo run:macos`
+        // script, so `expo prebuild` has nothing to remove, meaning there's nothing
+        // more to do here for react-native-macos at present.
     }
     return JSON.stringify(scripts);
 }

@@ -8,7 +8,7 @@ exports.createHashSourceExternalFileAsync = createHashSourceExternalFileAsync;
 exports.getEasBuildSourcesAsync = getEasBuildSourcesAsync;
 exports.getExpoAutolinkingAndroidSourcesAsync = getExpoAutolinkingAndroidSourcesAsync;
 exports.getExpoCNGPatchSourcesAsync = getExpoCNGPatchSourcesAsync;
-exports.getExpoAutolinkingIosSourcesAsync = getExpoAutolinkingIosSourcesAsync;
+exports.getExpoAutolinkingAppleSourcesAsync = getExpoAutolinkingAppleSourcesAsync;
 exports.sortExpoAutolinkingAndroidConfig = sortExpoAutolinkingAndroidConfig;
 exports.getConfigPluginProps = getConfigPluginProps;
 const spawn_async_1 = __importDefault(require("@expo/spawn-async"));
@@ -274,14 +274,19 @@ async function getExpoCNGPatchSourcesAsync(projectRoot, options) {
     }
     return [];
 }
-async function getExpoAutolinkingIosSourcesAsync(projectRoot, options, expoAutolinkingVersion) {
-    if (!options.platforms.includes('ios')) {
+async function getExpoAutolinkingAppleSourcesAsync(projectRoot, options, expoAutolinkingVersion) {
+    if (!options.platforms.some((platform) => platform === 'ios' || platform === 'macos')) {
         return [];
     }
     // expo-modules-autolinking 1.10.0 added support for apple platform
-    const platform = semver_1.default.lt(expoAutolinkingVersion, '1.10.0') ? 'ios' : 'apple';
+    const supportsApple = semver_1.default.gte(expoAutolinkingVersion, '1.10.0');
+    // If missing 'apple' platform support, for macOS-only projects, bail out.
+    if (!supportsApple && options.platforms.includes('macos') && !options.platforms.includes('ios')) {
+        return [];
+    }
+    const platform = supportsApple ? 'apple' : 'ios';
     try {
-        const reasons = ['expoAutolinkingIos'];
+        const reasons = ['expoAutolinkingApple'];
         const results = [];
         const { stdout } = await (0, spawn_async_1.default)('node', [(0, ExpoResolver_1.resolveExpoAutolinkingCliPath)(projectRoot), 'resolve', '-p', platform, '--json'], { cwd: projectRoot });
         const config = JSON.parse(stdout);
@@ -289,13 +294,13 @@ async function getExpoAutolinkingIosSourcesAsync(projectRoot, options, expoAutol
             for (const pod of module.pods) {
                 const filePath = (0, Path_1.toPosixPath)(path_1.default.relative(projectRoot, pod.podspecDir));
                 pod.podspecDir = filePath; // use relative path for the dir
-                debug(`Adding expo-modules-autolinking ios dir - ${chalk_1.default.dim(filePath)}`);
+                debug(`Adding expo-modules-autolinking Apple dir - ${chalk_1.default.dim(filePath)}`);
                 results.push({ type: 'dir', filePath, reasons });
             }
         }
         results.push({
             type: 'contents',
-            id: 'expoAutolinkingConfig:ios',
+            id: 'expoAutolinkingConfig:apple',
             contents: JSON.stringify(config),
             reasons,
         });

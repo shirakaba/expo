@@ -10,15 +10,20 @@ const path_1 = __importDefault(require("path"));
 const resolve_from_1 = __importDefault(require("resolve-from"));
 const Utils_1 = require("./Utils");
 const debug = require('debug')('expo:fingerprint:sourcer:Packages');
-const DEFAULT_PACKAGES = [
-    {
-        packageName: 'react-native',
-        packageJsonOnly: true,
-    },
-];
 async function getDefaultPackageSourcesAsync(projectRoot, options) {
-    const results = await Promise.all(DEFAULT_PACKAGES.map((params) => getPackageSourceAsync(projectRoot, params)));
+    const packages = getDefaultPackages(options.platforms);
+    const results = await Promise.all(packages.map((params) => getPackageSourceAsync(projectRoot, params)));
     return results.filter(Boolean);
+}
+function getDefaultPackages(platforms) {
+    const params = [];
+    if (platforms.some((platform) => platform === 'ios' || platform === 'android')) {
+        params.push({ packageName: 'react-native', packageJsonOnly: true });
+    }
+    if (platforms.includes('macos')) {
+        params.push({ packageName: 'react-native-macos', packageJsonOnly: true });
+    }
+    return params;
 }
 async function getPackageSourceAsync(projectRoot, params) {
     const reason = `package:${params.packageName}`;

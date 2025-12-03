@@ -37,10 +37,7 @@ export const resolveBuildCacheProvider = async (
       // We need to manually load dependencies installed on the fly
       const plugin = await manuallyLoadDependency(projectRoot, 'eas-build-cache-provider');
 
-      return {
-        plugin: plugin.default ?? plugin,
-        options: {},
-      };
+      return { plugin: plugin.default ?? plugin, options: {} };
     } catch (error: any) {
       if (error instanceof CommandError) {
         Log.warn(error.message);
@@ -67,7 +64,7 @@ export async function resolveBuildCache({
   runOptions,
 }: {
   projectRoot: string;
-  platform: 'android' | 'ios';
+  platform: 'android' | 'ios' | 'macos';
   provider: BuildCacheProvider;
   runOptions: RunOptions;
 }): Promise<string | null> {
@@ -102,7 +99,7 @@ export async function uploadBuildCache({
   runOptions,
 }: {
   projectRoot: string;
-  platform: 'android' | 'ios';
+  platform: 'android' | 'ios' | 'macos';
   provider: BuildCacheProvider;
   buildPath: string;
   runOptions: RunOptions;
@@ -121,24 +118,12 @@ export async function uploadBuildCache({
   if ('uploadRemoteBuildCache' in provider.plugin) {
     Log.warn('The uploadRemoteBuildCache function is deprecated. Use uploadBuildCache instead.');
     await provider.plugin.uploadRemoteBuildCache(
-      {
-        projectRoot,
-        platform,
-        fingerprintHash,
-        buildPath,
-        runOptions,
-      },
+      { projectRoot, platform, fingerprintHash, buildPath, runOptions },
       provider.options
     );
   } else {
     await provider.plugin.uploadBuildCache(
-      {
-        projectRoot,
-        platform,
-        fingerprintHash,
-        buildPath,
-        runOptions,
-      },
+      { projectRoot, platform, fingerprintHash, buildPath, runOptions },
       provider.options
     );
   }
@@ -151,7 +136,7 @@ async function calculateFingerprintHashAsync({
   runOptions,
 }: {
   projectRoot: string;
-  platform: 'android' | 'ios';
+  platform: 'android' | 'ios' | 'macos';
   provider: BuildCacheProvider;
   runOptions: RunOptions;
 }): Promise<string | null> {

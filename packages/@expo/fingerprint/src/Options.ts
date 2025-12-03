@@ -43,6 +43,13 @@ export const DEFAULT_IGNORE_PATHS = [
   '**/ios/**/project.xcworkspace',
   '**/ios/*.xcworkspace/xcuserdata/**/*',
 
+  // macOS
+  '**/macos/Pods/**/*',
+  '**/macos/build/**/*',
+  '**/macos/.xcode.env.local',
+  '**/macos/**/project.xcworkspace',
+  '**/macos/*.xcworkspace/xcuserdata/**/*',
+
   // System files that differ from machine to machine
   '**/.DS_Store',
 
@@ -86,9 +93,12 @@ export async function normalizeOptionsAsync(
   if (useCNGForPlatforms.ios) {
     appendIgnorePath(ignorePathMatchObjects, 'ios/**/*');
   }
+  if (useCNGForPlatforms.macos) {
+    appendIgnorePath(ignorePathMatchObjects, 'macos/**/*');
+  }
   return {
     // Defaults
-    platforms: ['android', 'ios'],
+    platforms: options?.platforms ?? ['android', 'ios'],
     concurrentIoLimit: os.cpus().length,
     hashAlgorithm: 'sha1',
     sourceSkips: DEFAULT_SOURCE_SKIPS,
@@ -140,10 +150,7 @@ async function resolveUseCNGAsync(
   options: Options | undefined,
   ignorePathMatchObjects: Minimatch[]
 ): Promise<Record<Platform, boolean>> {
-  const results: Record<Platform, boolean> = {
-    android: false,
-    ios: false,
-  };
+  const results: Record<Platform, boolean> = { android: false, ios: false, macos: false };
   const platforms = options?.platforms ?? ['android', 'ios'];
   for (const platform of platforms) {
     const projectWorkflow = await resolveProjectWorkflowAsync(

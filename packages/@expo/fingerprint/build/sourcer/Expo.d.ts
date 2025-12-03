@@ -12,7 +12,7 @@ export declare function getExpoAutolinkingAndroidSourcesAsync(projectRoot: strin
  * Gets the patch sources for the `patch-project`.
  */
 export declare function getExpoCNGPatchSourcesAsync(projectRoot: string, options: NormalizedOptions): Promise<HashSource[]>;
-export declare function getExpoAutolinkingIosSourcesAsync(projectRoot: string, options: NormalizedOptions, expoAutolinkingVersion: string): Promise<HashSource[]>;
+export declare function getExpoAutolinkingAppleSourcesAsync(projectRoot: string, options: NormalizedOptions, expoAutolinkingVersion: string): Promise<HashSource[]>;
 /**
  * Sort the expo-modules-autolinking android config to make it stable from hashing.
  */

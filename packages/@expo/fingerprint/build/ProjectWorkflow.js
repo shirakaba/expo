@@ -23,6 +23,15 @@ async function resolveProjectWorkflowAsync(projectRoot, platform, fingerprintIgn
         return 'unknown';
     }
     const { AndroidConfig, IOSConfig } = require(configPluginsPackageRoot);
+    // There is no equivalent to the utility function
+    // `IOSConfig.Paths.getPBXProjectPath(projectRoot)` for react-native-macos
+    // projects, so we can't auto-detect what workflow they're using.
+    //
+    // However, as CNG is not officially supported for react-native-macos anyway,
+    // it's reasonable to return either 'unknown' or 'generic' here for now.
+    if (platform === 'macos') {
+        return 'unknown';
+    }
     let platformWorkflowMarkers;
     try {
         platformWorkflowMarkers =
@@ -49,11 +58,12 @@ async function resolveProjectWorkflowAsync(projectRoot, platform, fingerprintIgn
     return 'managed';
 }
 async function resolveProjectWorkflowPerPlatformAsync(projectRoot, fingerprintIgnorePaths) {
-    const [android, ios] = await Promise.all([
+    const [android, ios, macos] = await Promise.all([
         resolveProjectWorkflowAsync(projectRoot, 'android', fingerprintIgnorePaths),
         resolveProjectWorkflowAsync(projectRoot, 'ios', fingerprintIgnorePaths),
+        resolveProjectWorkflowAsync(projectRoot, 'macos', fingerprintIgnorePaths),
     ]);
-    return { android, ios };
+    return { android, ios, macos };
 }
 async function getVCSClientAsync(projectRoot) {
     if (await isGitInstalledAndConfiguredAsync()) {

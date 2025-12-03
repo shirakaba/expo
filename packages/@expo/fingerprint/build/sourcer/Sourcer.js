@@ -27,7 +27,7 @@ async function getHashSourcesAsync(projectRoot, options) {
     const results = await Promise.all([
         // expo
         (0, Profile_1.profile)(options, Expo_1.getExpoAutolinkingAndroidSourcesAsync)(projectRoot, options, expoAutolinkingVersion),
-        (0, Profile_1.profile)(options, Expo_1.getExpoAutolinkingIosSourcesAsync)(projectRoot, options, expoAutolinkingVersion),
+        (0, Profile_1.profile)(options, Expo_1.getExpoAutolinkingAppleSourcesAsync)(projectRoot, options, expoAutolinkingVersion),
         (0, Profile_1.profile)(options, Expo_1.getExpoConfigSourcesAsync)(projectRoot, expoConfig, loadedModules, options),
         (0, Profile_1.profile)(options, Expo_1.getEasBuildSourcesAsync)(projectRoot, options),
         (0, Profile_1.profile)(options, Expo_1.getExpoCNGPatchSourcesAsync)(projectRoot, options),
@@ -37,13 +37,16 @@ async function getHashSourcesAsync(projectRoot, options) {
         // bare native files
         (0, Profile_1.profile)(options, Bare_1.getBareAndroidSourcesAsync)(projectRoot, options),
         (0, Profile_1.profile)(options, Bare_1.getBareIosSourcesAsync)(projectRoot, options),
+        (0, Profile_1.profile)(options, Bare_1.getBareMacosSourcesAsync)(projectRoot, options),
         // react-native core autolinking
         (0, Profile_1.profile)(options, Bare_1.getCoreAutolinkingSourcesFromExpoAndroid)(projectRoot, options, useRNCoreAutolinkingFromExpo),
         (0, Profile_1.profile)(options, Bare_1.getCoreAutolinkingSourcesFromExpoIos)(projectRoot, options, useRNCoreAutolinkingFromExpo),
+        (0, Profile_1.profile)(options, Bare_1.getCoreAutolinkingSourcesFromExpoMacos)(projectRoot, options, useRNCoreAutolinkingFromExpo),
         (0, Profile_1.profile)(options, Bare_1.getCoreAutolinkingSourcesFromRncCliAsync)(projectRoot, options, useRNCoreAutolinkingFromExpo),
         // patch-package
         (0, Profile_1.profile)(options, PatchPackage_1.getPatchPackageSourcesAsync)(projectRoot, options),
-        // some known dependencies, e.g. react-native
+        // some known dependencies, e.g. react-native (and react-native-macos as
+        // appopriate)
         (0, Profile_1.profile)(options, Packages_1.getDefaultPackageSourcesAsync)(projectRoot, options),
     ]);
     // extra sources

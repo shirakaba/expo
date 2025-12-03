@@ -76,57 +76,57 @@ exports[`getHashSourcesAsync - managed project should match snapshot 1`] = `
   {
     "filePath": "node_modules/expo",
     "reasons": [
-      "expoAutolinkingIos",
+      "expoAutolinkingApple",
     ],
     "type": "dir",
   },
   {
     "filePath": "node_modules/expo-application/ios",
     "reasons": [
-      "expoAutolinkingIos",
+      "expoAutolinkingApple",
     ],
     "type": "dir",
   },
   {
     "filePath": "node_modules/expo-constants/ios",
     "reasons": [
-      "expoAutolinkingIos",
+      "expoAutolinkingApple",
     ],
     "type": "dir",
   },
   {
     "filePath": "node_modules/expo-file-system/ios",
     "reasons": [
-      "expoAutolinkingIos",
+      "expoAutolinkingApple",
     ],
     "type": "dir",
   },
   {
     "filePath": "node_modules/expo-font/ios",
     "reasons": [
-      "expoAutolinkingIos",
+      "expoAutolinkingApple",
     ],
     "type": "dir",
   },
   {
     "filePath": "node_modules/expo-keep-awake/ios",
     "reasons": [
-      "expoAutolinkingIos",
+      "expoAutolinkingApple",
     ],
     "type": "dir",
   },
   {
     "filePath": "node_modules/expo-modules-core",
     "reasons": [
-      "expoAutolinkingIos",
+      "expoAutolinkingApple",
     ],
     "type": "dir",
   },
   {
     "contents": "{"extraDependencies":{"androidMavenRepos":[],"iosPods":{}},"modules":[{"packageName":"expo","packageVersion":"49.0.16","pods":[{"podName":"Expo","podspecDir":"node_modules/expo"}],"swiftModuleNames":["Expo"],"modules":[],"appDelegateSubscribers":[],"reactDelegateHandlers":[],"debugOnly":false},{"packageName":"expo-application","packageVersion":"5.3.1","pods":[{"podName":"EXApplication","podspecDir":"node_modules/expo-application/ios"}],"swiftModuleNames":["EXApplication"],"modules":[],"appDelegateSubscribers":[],"reactDelegateHandlers":[],"debugOnly":false},{"packageName":"expo-constants","packageVersion":"14.4.2","pods":[{"podName":"EXConstants","podspecDir":"node_modules/expo-constants/ios"}],"swiftModuleNames":["EXConstants"],"modules":["ConstantsModule"],"appDelegateSubscribers":[],"reactDelegateHandlers":[],"debugOnly":false},{"packageName":"expo-file-system","packageVersion":"15.4.5","pods":[{"podName":"EXFileSystem","podspecDir":"node_modules/expo-file-system/ios"}],"swiftModuleNames":["EXFileSystem"],"modules":[],"appDelegateSubscribers":[],"reactDelegateHandlers":[],"debugOnly":false},{"packageName":"expo-font","packageVersion":"11.4.0","pods":[{"podName":"EXFont","podspecDir":"node_modules/expo-font/ios"}],"swiftModuleNames":["EXFont"],"modules":[],"appDelegateSubscribers":[],"reactDelegateHandlers":[],"debugOnly":false},{"packageName":"expo-keep-awake","packageVersion":"12.3.0","pods":[{"podName":"ExpoKeepAwake","podspecDir":"node_modules/expo-keep-awake/ios"}],"swiftModuleNames":["ExpoKeepAwake"],"modules":["KeepAwakeModule"],"appDelegateSubscribers":[],"reactDelegateHandlers":[],"debugOnly":false},{"packageName":"expo-modules-core","packageVersion":"1.5.11","pods":[{"podName":"ExpoModulesCore","podspecDir":"node_modules/expo-modules-core"}],"swiftModuleNames":["ExpoModulesCore"],"modules":[],"appDelegateSubscribers":[],"reactDelegateHandlers":[],"debugOnly":false}]}",
-    "id": "expoAutolinkingConfig:ios",
+    "id": "expoAutolinkingConfig:apple",
     "reasons": [
-      "expoAutolinkingIos",
+      "expoAutolinkingApple",
     ],
     "type": "contents",
   },

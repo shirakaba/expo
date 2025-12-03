@@ -36,7 +36,7 @@ export type RunOptions = AndroidRunOptions | IosRunOptions;
 
 export type ResolveBuildCacheProps = {
   projectRoot: string;
-  platform: 'android' | 'ios';
+  platform: 'android' | 'ios' | 'macos';
   runOptions: RunOptions;
   fingerprintHash: string;
 };
@@ -51,7 +51,7 @@ export type UploadBuildCacheProps = {
   buildPath: string;
   runOptions: RunOptions;
   fingerprintHash: string;
-  platform: 'android' | 'ios';
+  platform: 'android' | 'ios' | 'macos';
 };
 /**
  * @deprecated Use `ResolveBuildCacheProps` instead.
@@ -60,14 +60,11 @@ export type UploadRemoteBuildCacheProps = UploadBuildCacheProps;
 
 export type CalculateFingerprintHashProps = {
   projectRoot: string;
-  platform: 'android' | 'ios';
+  platform: 'android' | 'ios' | 'macos';
   runOptions: RunOptions;
 };
 
-export type BuildCacheProvider<T = any> = {
-  plugin: BuildCacheProviderPlugin<T>;
-  options: T;
-};
+export type BuildCacheProvider<T = any> = { plugin: BuildCacheProviderPlugin<T>; options: T };
 
 export type BuildCacheProviderPlugin<T = any> = {
   calculateFingerprintHash?: (

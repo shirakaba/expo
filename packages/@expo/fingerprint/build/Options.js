@@ -41,6 +41,12 @@ exports.DEFAULT_IGNORE_PATHS = [
     '**/ios/.xcode.env.local',
     '**/ios/**/project.xcworkspace',
     '**/ios/*.xcworkspace/xcuserdata/**/*',
+    // macOS
+    '**/macos/Pods/**/*',
+    '**/macos/build/**/*',
+    '**/macos/.xcode.env.local',
+    '**/macos/**/project.xcworkspace',
+    '**/macos/*.xcworkspace/xcuserdata/**/*',
     // System files that differ from machine to machine
     '**/.DS_Store',
     // Ignore all expo configs because we will read expo config in a HashSourceContents already
@@ -71,9 +77,12 @@ async function normalizeOptionsAsync(projectRoot, options) {
     if (useCNGForPlatforms.ios) {
         (0, Path_1.appendIgnorePath)(ignorePathMatchObjects, 'ios/**/*');
     }
+    if (useCNGForPlatforms.macos) {
+        (0, Path_1.appendIgnorePath)(ignorePathMatchObjects, 'macos/**/*');
+    }
     return {
         // Defaults
-        platforms: ['android', 'ios'],
+        platforms: options?.platforms ?? ['android', 'ios'],
         concurrentIoLimit: os_1.default.cpus().length,
         hashAlgorithm: 'sha1',
         sourceSkips: exports.DEFAULT_SOURCE_SKIPS,
@@ -113,10 +122,7 @@ async function collectIgnorePathsAsync(projectRoot, pathsFromConfig, options) {
     return (0, Path_1.buildPathMatchObjects)(ignorePaths);
 }
 async function resolveUseCNGAsync(projectRoot, options, ignorePathMatchObjects) {
-    const results = {
-        android: false,
-        ios: false,
-    };
+    const results = { android: false, ios: false, macos: false };
     const platforms = options?.platforms ?? ['android', 'ios'];
     for (const platform of platforms) {
         const projectWorkflow = await (0, ProjectWorkflow_1.resolveProjectWorkflowAsync)(projectRoot, platform, ignorePathMatchObjects);

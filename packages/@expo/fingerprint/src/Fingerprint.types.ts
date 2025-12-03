@@ -63,13 +63,13 @@ export type FingerprintDiffItem =
       afterSource: FingerprintSource;
     };
 
-export type Platform = 'android' | 'ios';
+export type Platform = 'android' | 'ios' | 'macos';
 export type ProjectWorkflow = 'generic' | 'managed' | 'unknown';
 
 export interface Options {
   /**
    * Limit native files to those for specified platforms.
-   * @default ['android', 'ios']
+   * @default ['android', 'ios', 'macos']
    */
   platforms?: Platform[];
 
@@ -160,9 +160,7 @@ export type Config = Pick<
   | 'useRNCoreAutolinkingFromExpo'
   | 'debug'
   | 'fileHookTransform'
-> & {
-  sourceSkips?: SourceSkips | SourceSkipsKeys[];
-};
+> & { sourceSkips?: SourceSkips | SourceSkipsKeys[] };
 
 /**
  * Hook function to transform file content sources before hashing.
@@ -194,14 +192,8 @@ export type FileHookTransformFunction = (
  * The `source` parameter for `FileHookTransformFunction`.
  */
 export type FileHookTransformSource =
-  | {
-      type: 'file';
-      filePath: string;
-    }
-  | {
-      type: 'contents';
-      id: string;
-    };
+  | { type: 'file'; filePath: string }
+  | { type: 'contents'; id: string };
 
 export interface HashSourceFile {
   type: 'file';

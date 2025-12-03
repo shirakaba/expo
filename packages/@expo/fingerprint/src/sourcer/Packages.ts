@@ -3,7 +3,7 @@ import path from 'path';
 import resolveFrom from 'resolve-from';
 
 import { getFileBasedHashSourceAsync } from './Utils';
-import type { HashSource, NormalizedOptions } from '../Fingerprint.types';
+import type { HashSource, NormalizedOptions, Platform } from '../Fingerprint.types';
 
 const debug = require('debug')('expo:fingerprint:sourcer:Packages');
 
@@ -23,21 +23,28 @@ interface PackageSourcerParams {
   packageJsonOnly: boolean;
 }
 
-const DEFAULT_PACKAGES: PackageSourcerParams[] = [
-  {
-    packageName: 'react-native',
-    packageJsonOnly: true,
-  },
-];
-
 export async function getDefaultPackageSourcesAsync(
   projectRoot: string,
   options: NormalizedOptions
 ): Promise<HashSource[]> {
+  const packages = getDefaultPackages(options.platforms);
   const results = await Promise.all(
-    DEFAULT_PACKAGES.map((params) => getPackageSourceAsync(projectRoot, params))
+    packages.map((params) => getPackageSourceAsync(projectRoot, params))
   );
   return results.filter(Boolean) as HashSource[];
+}
+
+function getDefaultPackages(platforms: Platform[]): PackageSourcerParams[] {
+  const params = [];
+
+  if (platforms.some((platform) => platform === 'ios' || platform === 'android')) {
+    params.push({ packageName: 'react-native', packageJsonOnly: true });
+  }
+  if (platforms.includes('macos')) {
+    params.push({ packageName: 'react-native-macos', packageJsonOnly: true });
+  }
+
+  return params;
 }
 
 export async function getPackageSourceAsync(

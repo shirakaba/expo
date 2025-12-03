@@ -41,6 +41,20 @@ export async function getBareIosSourcesAsync(
   return [];
 }
 
+export async function getBareMacosSourcesAsync(
+  projectRoot: string,
+  options: NormalizedOptions
+): Promise<HashSource[]> {
+  if (options.platforms.includes('macos')) {
+    const result = await getFileBasedHashSourceAsync(projectRoot, 'macos', 'bareNativeDir');
+    if (result != null) {
+      debug(`Adding bare native dir - ${chalk.dim('macos')}`);
+      return [result];
+    }
+  }
+  return [];
+}
+
 export async function getPackageJsonScriptSourcesAsync(
   projectRoot: string,
   options: NormalizedOptions
@@ -169,6 +183,40 @@ export async function getCoreAutolinkingSourcesFromExpoIos(
   }
 }
 
+export async function getCoreAutolinkingSourcesFromExpoMacos(
+  projectRoot: string,
+  options: NormalizedOptions,
+  useRNCoreAutolinkingFromExpo?: boolean
+): Promise<HashSource[]> {
+  if (useRNCoreAutolinkingFromExpo === false || !options.platforms.includes('macos')) {
+    return [];
+  }
+  try {
+    const { stdout } = await spawnAsync(
+      'node',
+      [
+        resolveExpoAutolinkingCliPath(projectRoot),
+        'react-native-config',
+        '--json',
+        '--platform',
+        'macos',
+      ],
+      { cwd: projectRoot }
+    );
+    const config = JSON.parse(stdout);
+    const results: HashSource[] = await parseCoreAutolinkingSourcesAsync({
+      config,
+      contentsId: 'rncoreAutolinkingConfig:macos',
+      reasons: ['rncoreAutolinkingMacos'],
+      platform: 'macos',
+    });
+    return results;
+  } catch (e) {
+    debug(chalk.red(`Error adding react-native core autolinking sources for macos.\n${e}`));
+    return [];
+  }
+}
+
 async function parseCoreAutolinkingSourcesAsync({
   config,
   reasons,
@@ -250,6 +298,9 @@ function normalizePackageJsonScriptSources(
     if (!scripts.ios?.includes('run') || scripts.ios === 'expo run:ios') {
       delete scripts.ios;
     }
+    // Non-development builds do not (currently) begin with an `expo run:macos`
+    // script, so `expo prebuild` has nothing to remove, meaning there's nothing
+    // more to do here for react-native-macos at present.
   }
   return JSON.stringify(scripts);
 }

@@ -14,7 +14,7 @@ import {
   getConfigPluginProps,
   getEasBuildSourcesAsync,
   getExpoAutolinkingAndroidSourcesAsync,
-  getExpoAutolinkingIosSourcesAsync,
+  getExpoAutolinkingAppleSourcesAsync,
   getExpoConfigSourcesAsync,
   getExpoCNGPatchSourcesAsync,
   sortExpoAutolinkingAndroidConfig,
@@ -76,12 +76,7 @@ describe(getEasBuildSourcesAsync, () => {
     );
 
     const sources = await getEasBuildSourcesAsync('/app', await normalizeOptionsAsync('/app'));
-    expect(sources).toContainEqual(
-      expect.objectContaining({
-        type: 'file',
-        filePath: 'eas.json',
-      })
-    );
+    expect(sources).toContainEqual(expect.objectContaining({ type: 'file', filePath: 'eas.json' }));
   });
 });
 
@@ -93,7 +88,7 @@ describe('getExpoAutolinkingSourcesAsync', () => {
       'utf8'
     );
     const fixtureIos = fs.readFileSync(
-      path.join(__dirname, 'fixtures', 'ExpoAutolinkingIos.json'),
+      path.join(__dirname, 'fixtures', 'ExpoAutolinkingApple.json'),
       'utf8'
     );
     mockSpawnAsync.mockResolvedValueOnce({
@@ -123,14 +118,11 @@ describe('getExpoAutolinkingSourcesAsync', () => {
       expoAutolinkingVersion
     );
     expect(sources).toContainEqual(
-      expect.objectContaining({
-        type: 'dir',
-        filePath: 'node_modules/expo-modules-core/android',
-      })
+      expect.objectContaining({ type: 'dir', filePath: 'node_modules/expo-modules-core/android' })
     );
     expect(sources).toMatchSnapshot();
 
-    sources = await getExpoAutolinkingIosSourcesAsync(
+    sources = await getExpoAutolinkingAppleSourcesAsync(
       '/app',
       await normalizeOptionsAsync('/app'),
       expoAutolinkingVersion
@@ -153,7 +145,7 @@ describe('getExpoAutolinkingSourcesAsync', () => {
       }
     }
 
-    sources = await getExpoAutolinkingIosSourcesAsync(
+    sources = await getExpoAutolinkingAppleSourcesAsync(
       '/app',
       await normalizeOptionsAsync('/app'),
       expoAutolinkingVersion
@@ -250,10 +242,7 @@ describe(getExpoConfigSourcesAsync, () => {
     const { config, loadedModules } = await getExpoConfigAsync('/app', options);
     const sources = await getExpoConfigSourcesAsync('/app', config, loadedModules, options);
     expect(sources).toContainEqual(
-      expect.objectContaining({
-        type: 'file',
-        filePath: 'assets/icon.png',
-      })
+      expect.objectContaining({ type: 'file', filePath: 'assets/icon.png' })
     );
   });
 
@@ -276,22 +265,13 @@ describe(getExpoConfigSourcesAsync, () => {
     const { config, loadedModules } = await getExpoConfigAsync('/app', options);
     const sources = await getExpoConfigSourcesAsync('/app', config, loadedModules, options);
     expect(sources).toContainEqual(
-      expect.objectContaining({
-        type: 'file',
-        filePath: 'assets/icon-light.png',
-      })
+      expect.objectContaining({ type: 'file', filePath: 'assets/icon-light.png' })
     );
     expect(sources).toContainEqual(
-      expect.objectContaining({
-        type: 'file',
-        filePath: 'assets/icon-dark.png',
-      })
+      expect.objectContaining({ type: 'file', filePath: 'assets/icon-dark.png' })
     );
     expect(sources).toContainEqual(
-      expect.objectContaining({
-        type: 'file',
-        filePath: 'assets/icon-tinted.png',
-      })
+      expect.objectContaining({ type: 'file', filePath: 'assets/icon-tinted.png' })
     );
   });
 
@@ -459,9 +439,7 @@ describe(getExpoConfigSourcesAsync, () => {
     vol.mkdirSync('/app/assets/images', { recursive: true });
     vol.writeFileSync('/app/assets/images/splash-icon.png', 'PNG data');
 
-    const config = {
-      exp: JSON.parse(vol.readFileSync('/app/app.json', 'utf8').toString()).expo,
-    };
+    const config = { exp: JSON.parse(vol.readFileSync('/app/app.json', 'utf8').toString()).expo };
     const configResult = JSON.stringify({ config, loadedModules: [] });
     const mockSpawnWithIpcAsync = spawnWithIpcAsync as jest.MockedFunction<
       typeof spawnWithIpcAsync
@@ -478,10 +456,7 @@ describe(getExpoConfigSourcesAsync, () => {
     const { config: expoConfig, loadedModules } = await getExpoConfigAsync('/app', options);
     const sources = await getExpoConfigSourcesAsync('/app', expoConfig, loadedModules, options);
     expect(sources).toContainEqual(
-      expect.objectContaining({
-        type: 'file',
-        filePath: 'assets/images/splash-icon.png',
-      })
+      expect.objectContaining({ type: 'file', filePath: 'assets/images/splash-icon.png' })
     );
   });
 
@@ -510,10 +485,7 @@ describe(getExpoConfigSourcesAsync, () => {
     const { config: expoConfig, loadedModules } = await getExpoConfigAsync('/app', options);
     const sources = await getExpoConfigSourcesAsync('/app', expoConfig, loadedModules, options);
     expect(sources).toContainEqual(
-      expect.objectContaining({
-        type: 'file',
-        filePath: 'node_modules/third-party/index.js',
-      })
+      expect.objectContaining({ type: 'file', filePath: 'node_modules/third-party/index.js' })
     );
     expect(sources).toContainEqual(
       expect.objectContaining({
@@ -707,10 +679,7 @@ module.exports = config;
     const { config, loadedModules } = await getExpoConfigAsync('/app', options);
     const sources = await getExpoConfigSourcesAsync('/app', config, loadedModules, options);
     expect(sources).not.toContainEqual(
-      expect.objectContaining({
-        type: 'file',
-        filePath: './assets/icon.png',
-      })
+      expect.objectContaining({ type: 'file', filePath: './assets/icon.png' })
     );
   });
 
@@ -736,10 +705,7 @@ describe(getExpoCNGPatchSourcesAsync, () => {
 
     const sources = await getExpoCNGPatchSourcesAsync('/app', await normalizeOptionsAsync('/app'));
     expect(sources).toContainEqual(
-      expect.objectContaining({
-        type: 'dir',
-        filePath: 'cng-patches',
-      })
+      expect.objectContaining({ type: 'dir', filePath: 'cng-patches' })
     );
   });
 });
@@ -752,12 +718,7 @@ describe('sortExpoAutolinkingConfig', () => {
         {
           packageName: 'expo',
           packageVersion: '49.0.5',
-          projects: [
-            {
-              name: 'expo',
-              sourceDir: '/app/node_modules/expo/android',
-            },
-          ],
+          projects: [{ name: 'expo', sourceDir: '/app/node_modules/expo/android' }],
           modules: [],
         },
         {
@@ -768,10 +729,7 @@ describe('sortExpoAutolinkingConfig', () => {
               name: 'expo-modules-core$android-annotation',
               sourceDir: '/app/node_modules/expo-modules-core/android-annotation',
             },
-            {
-              name: 'expo-modules-core',
-              sourceDir: '/app/node_modules/expo-modules-core/android',
-            },
+            { name: 'expo-modules-core', sourceDir: '/app/node_modules/expo-modules-core/android' },
             {
               name: 'expo-modules-core$android-annotation-processor',
               sourceDir: '/app/node_modules/expo-modules-core/android-annotation-processor',
@@ -793,11 +751,7 @@ describe('sortExpoAutolinkingConfig', () => {
 
 describe(getConfigPluginProps, () => {
   it('should return null from config without plugins', () => {
-    const config: ExpoConfig = {
-      name: 'test',
-      slug: 'test',
-      version: '1.0.0',
-    };
+    const config: ExpoConfig = { name: 'test', slug: 'test', version: '1.0.0' };
     expect(getConfigPluginProps(config, 'test')).toBeNull();
   });
 

@@ -9,11 +9,13 @@ import {
   getCoreAutolinkingSourcesFromRncCliAsync,
   getCoreAutolinkingSourcesFromExpoAndroid,
   getCoreAutolinkingSourcesFromExpoIos,
+  getBareMacosSourcesAsync,
+  getCoreAutolinkingSourcesFromExpoMacos,
 } from './Bare';
 import {
   getEasBuildSourcesAsync,
   getExpoAutolinkingAndroidSourcesAsync,
-  getExpoAutolinkingIosSourcesAsync,
+  getExpoAutolinkingAppleSourcesAsync,
   getExpoConfigSourcesAsync,
   getExpoCNGPatchSourcesAsync,
 } from './Expo';
@@ -48,7 +50,7 @@ export async function getHashSourcesAsync(
       options,
       expoAutolinkingVersion
     ),
-    profile(options, getExpoAutolinkingIosSourcesAsync)(
+    profile(options, getExpoAutolinkingAppleSourcesAsync)(
       projectRoot,
       options,
       expoAutolinkingVersion
@@ -64,6 +66,7 @@ export async function getHashSourcesAsync(
     // bare native files
     profile(options, getBareAndroidSourcesAsync)(projectRoot, options),
     profile(options, getBareIosSourcesAsync)(projectRoot, options),
+    profile(options, getBareMacosSourcesAsync)(projectRoot, options),
 
     // react-native core autolinking
     profile(options, getCoreAutolinkingSourcesFromExpoAndroid)(
@@ -72,6 +75,11 @@ export async function getHashSourcesAsync(
       useRNCoreAutolinkingFromExpo
     ),
     profile(options, getCoreAutolinkingSourcesFromExpoIos)(
+      projectRoot,
+      options,
+      useRNCoreAutolinkingFromExpo
+    ),
+    profile(options, getCoreAutolinkingSourcesFromExpoMacos)(
       projectRoot,
       options,
       useRNCoreAutolinkingFromExpo
@@ -85,7 +93,8 @@ export async function getHashSourcesAsync(
     // patch-package
     profile(options, getPatchPackageSourcesAsync)(projectRoot, options),
 
-    // some known dependencies, e.g. react-native
+    // some known dependencies, e.g. react-native (and react-native-macos as
+    // appopriate)
     profile(options, getDefaultPackageSourcesAsync)(projectRoot, options),
   ]);
 
